@@ -9,11 +9,21 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.test.jwt.auth.JWTUtil;
+import com.test.jwt.auth.LoginFilter;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+	private final AuthenticationConfiguration configuration;
+	private final JWTUtil jwtUtil;
+	
 	@Bean
 	BCryptPasswordEncoder encoder() {
 		
@@ -53,6 +63,10 @@ public class SecurityConfig {
 //			.invalidateHttpSession(true)
 //			.deleteCookies("JSESSIONID")
 //		);
+		
+		//LoginFilter 등록하기
+		//- /login 요청 > 이 필터 가로채어서 동작을 합니다.
+		http.addFilterAt(new LoginFilter(manager(configuration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 		
 		return http.build();
 	}
