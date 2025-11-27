@@ -2,27 +2,30 @@ spring:
   application:
     name: jwt
 
-    
-  # JDBC(+HikariCP) 설정
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
     username: springboot
     url: jdbc:oracle:thin:@localhost:1521/xe
     password: java1234    
 
-  # JPA 설정
   jpa:
     database: oracle
     hibernate:
       ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    show-sql: true # 콘솔 로그에 SQL 출력
+    show-sql: true
     properties:
       hibernate:
-        format-sql: true # SQL 포맷 이쁘게
-        highlight_sql: true # SQL 색깔 추가
-
+        format-sql: true
+        highlight_sql: true
+        
+  # JWT 설정
+  # Git Bash
+  # $ openssl rand -hex 64
+  
+  
+  
 logging:
   level:
     org:
@@ -31,3 +34,4 @@ logging:
         orm:
           jdbc:
             bind: trace
+          
