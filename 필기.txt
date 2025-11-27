@@ -1,0 +1,112 @@
+프로젝트 생성
+- Name: "jwt"
+- Language: Java
+- Type: Gradle - Groovy
+- Group: "com.test"
+- Artifact: "jwt"
+- Package name: "com.test.jwt"
+- Java: 17
+- Packaging: jar
+- Dependencies:
+	- Spring Web
+	- Lombok
+	- Oracle Driver
+	- Spring Boot DevTools
+	- Spring Data JPA
+	- Spring Security
+
+	
+build.gradle
+- jwt 의존성
+
+
+application.yml
+- JPA 설정
+
+
+파일 생성하기
+- jwt > "script.sql"
+- "com.test.jwt.dto" > "MemberDTO.java"
+- "com.test.jwt.entity" > "Member.java"
+- "com.test.jwt.repository" > "MemberRepository.java"(I)
+- "com.test.jwt.config" > "SecurityConfig.java"
+- "com.test.jwt.controller" > "MainController.java"
+- "com.test.jwt.service" > "MemberService.java"
+
+
+JWT, Json Web Token
+- 사용자 정보/권한을 JSON 형태로 저장 + 서버가 서명해서 만든 위변조 방지 토큰
+- 세션 인증 방식 대신 > 인증에 사용
+- JWT는 세션을 사용하지 않는 인증 방식(+ 세션 일부 사용)
+
+Session vs JWT
+- 세션 인증: 서버측에서 사용자의 로그인 상태를 기억 + 관리 > Stateful
+- JWT 인증: 서버측에서는 사용자에 대한 관리 안함. 토큰을 클라이언트 스스로가 관리하면서 스스로를 인증하는 방식 > Stateless
+
+
+인증 방식 선택 기준
+- JWT: 분산 서버 환경. 이 기종 클라이언트을 지원한 서버 환경. 모바일 웹/앱 서버용
+
+
+
+회원 가입(REST) + JWT와 무관
+- MainController.java
+- MemberService.java
++ JPA
+
+
+
+Spring Security
+1. 세션 인증 > UserDetails <  인증(DB + 폼 방식)
+2. 소셜 인증 > UserDetails < 인증(제3자)
+3. JWT 인증 > UserDetails < 인증(JWT)
+
+
+
+
+JWT 기반 로그인 구현하기
+- 액세스 토큰 구현하기(인증 티켓 역할)
+
+- com.test.jwt.dto > "CustomUserDetails.java" //Authentication,pricipal 인증객체
+- "com.test.jwt.auth" > "JWTUtil.java" //JWT 관련 기능 구현 객체
+- com.test.jwt.service > "CustomUserDetailsService.java"
+- com.test.jwt.auth > "LoginFilter.java" //로그인 처리 필터
+- com.test.jwt.auth > "JWTFilter.java" //인증/허가 처리 필터
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	

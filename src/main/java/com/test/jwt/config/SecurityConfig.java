@@ -1,0 +1,88 @@
+package com.test.jwt.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+	@Bean
+	BCryptPasswordEncoder encoder() {
+		
+		return new BCryptPasswordEncoder();
+	}
+	
+	@Bean
+	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		
+		//CSRF 비활성
+		http.csrf(auth -> auth.disable());
+		
+		//Form Login > 사용안함
+		http.formLogin(auth -> auth.disable());
+		
+		//기본 인증
+		http.httpBasic(auth -> auth.disable());
+		
+		//세션 설정
+		//- 기존의 세션 인증 방식을 비활성화 > 대신 JWT 방식 사용
+		http.sessionManagement(auth -> auth
+			.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+		);
+		
+		//허가 URL
+		http.authorizeHttpRequests(auth -> auth
+			.requestMatchers("/", "/login/**", "join/**", "/joinok/**").permitAll()
+			.requestMatchers("/member").hasAnyRole("MEMBER", "ADMIN")
+			.requestMatchers("/admin").hasRole("ADMIN")
+			.anyRequest().authenticated()
+		);
+		
+		//로그아웃 추가
+//		http.logout(auth -> auth
+//			.logoutUrl("/logout")
+//			.logoutSuccessUrl("/")
+//			.invalidateHttpSession(true)
+//			.deleteCookies("JSESSIONID")
+//		);
+		
+		return http.build();
+	}
+	
+	
+	//AuthenticationManager
+	//- JWT 인증 관리
+	//- 사용자가 로그인 시도 > 실제로 ID와 PW가 일치하는 검증
+	//- loadUserByUsername 관여
+	//- 직접 생성 이유 > 폼 인증을 사용 안해서..
+	
+	//폼 인증 = ID/PW 입력 > Security가 자동 처리 + 세션 기반 인증
+	//JWT 인증 = ID/PW 입력 > 커스텀 필터(LoginFilter) 동작 > AuthenticationManager 직접 인증 처리 > JWT 토큰 직접 발급 + 응답 헤더 반환 > 클라이언트는 응답 토큰 보관 > 이 후에 서버로 접속 + 토큰 전달 > 커스텀 필터(JWTFilter) 동작 + 토큰 유효성/검증
+	@Bean
+	AuthenticationManager manager(AuthenticationConfiguration config) throws Exception {
+		
+		return config.getAuthenticationManager();		
+	}
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
