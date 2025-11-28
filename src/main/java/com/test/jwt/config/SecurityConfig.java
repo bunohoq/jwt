@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.test.jwt.auth.JWTFilter;
 import com.test.jwt.auth.JWTUtil;
 import com.test.jwt.auth.LoginFilter;
 
@@ -64,8 +65,12 @@ public class SecurityConfig {
 //			.deleteCookies("JSESSIONID")
 //		);
 		
+		//JWTFilter 등록하기
+		http.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+		
 		//LoginFilter 등록하기
 		//- /login 요청 > 이 필터 가로채어서 동작을 합니다.
+		//-  UsernamePasswordAuthenticationFilter(시큐리티 기본 인증 필터) > LoginFilter(사용자 정의)로 교체
 		http.addFilterAt(new LoginFilter(manager(configuration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 		
 		return http.build();
