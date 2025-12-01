@@ -60,7 +60,7 @@ public class SecurityConfig {
 		//허가 URL
 		http.authorizeHttpRequests(auth -> auth
 			.requestMatchers("/", "/login/**", "join/**", "/joinok/**").permitAll()
-			.requestMatchers("/member").hasAnyRole("MEMBER", "ADMIN")
+			.requestMatchers("/member/**").hasAnyRole("MEMBER", "ADMIN")
 			.requestMatchers("/admin").hasRole("ADMIN")
 			.anyRequest().authenticated()
 		);
