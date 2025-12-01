@@ -17,6 +17,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.test.jwt.auth.JWTFilter;
 import com.test.jwt.auth.JWTUtil;
 import com.test.jwt.auth.LoginFilter;
+import com.test.jwt.repository.RefreshTokenRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +28,7 @@ public class SecurityConfig {
 	
 	private final AuthenticationConfiguration configuration;
 	private final JWTUtil jwtUtil;
+	private final RefreshTokenRepository repo;
 
 	@Bean
 	BCryptPasswordEncoder encoder() {
@@ -82,7 +84,7 @@ public class SecurityConfig {
 		//LoginFilter 등록하기
 		//- /login 요청 > 이 필터 가로채어서 동작을 한다.
 		//- UsernamePasswordAuthenticationFilter(시큐리티 기본 인증 필터) > LoginFilter(사용자 정의)로 교체
-		http.addFilterAt(new LoginFilter(manager(configuration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+		http.addFilterAt(new LoginFilter(manager(configuration), jwtUtil, repo, jwtUtil.getRefreshExpiredMs()), UsernamePasswordAuthenticationFilter.class);
 		
 		return http.build();
 	}

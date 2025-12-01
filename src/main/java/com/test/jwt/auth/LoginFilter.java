@@ -12,9 +12,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.test.jwt.dto.CustomUserDetails;
+import com.test.jwt.entity.RefreshToken;
+import com.test.jwt.repository.RefreshTokenRepository;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -28,9 +31,19 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 	private final AuthenticationManager authManager; //인증 담당
 	private final JWTUtil jwtUtil; //토큰 발행
 	
-	public LoginFilter(AuthenticationManager authManager, JWTUtil jwtUtil) {
+	private final RefreshTokenRepository repo;
+	private final Long refreshExpiredMs;
+	
+	public LoginFilter(
+				AuthenticationManager authManager, 
+				JWTUtil jwtUtil,
+				RefreshTokenRepository repo,
+				Long refreshExpiredMs) {
+		
 		this.authManager = authManager;
 		this.jwtUtil = jwtUtil;
+		this.repo = repo;
+		this.refreshExpiredMs = refreshExpiredMs;
 	}
 	
 	// 사용자 로그인(/login)을 시도하면 > 이 메서드가 호출
@@ -81,6 +94,27 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		//- Authorization > 키
 		//- "Bearer " + 토큰 > 값
 		response.setHeader("Authorization", "Bearer " + accessToken);		
+
+		
+		//JWT 토큰 생성 > 리프레시 토큰 생성
+		String refreshToken = jwtUtil.createRefreshToken(username, role);
+		
+		//a. 리프레시 토큰> DB 저장
+		RefreshToken refreshEntity = new RefreshToken(username, refreshToken);
+		
+		repo.save(refreshEntity); //insert or update
+		
+		//b. 리프레시 토큰 > 클라이언트 반환
+		//- HttpOnly 쿠키로 반환(***** 보안)
+		Cookie cookie = new Cookie("refresh_cookie", refreshToken);
+		
+		cookie.setMaxAge((int)(refreshExpiredMs / 1000)); //초
+		cookie.setHttpOnly(true); //JavaScript가 이 쿠키 열람 불가!!
+		cookie.setPath("/"); //사이트 전체에서 사용
+		//cookie.setSecure(true); //쿠키값 암호화(https)
+		
+		response.addCookie(cookie);
+		
 	}
 	
 	@Override

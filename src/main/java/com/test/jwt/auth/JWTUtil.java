@@ -88,4 +88,10 @@ public class JWTUtil {
     	return createJwt(username, role, refreshExpiredMs);
     }
 
+	public Long getRefreshExpiredMs() {
+		return refreshExpiredMs;
+	}
+    
+    
+
 }
