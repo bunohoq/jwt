@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Spring Boot</title>
+    <link rel="stylesheet" href="http://bit.ly/3WJ5ilK">
+</head>
+<body>
+
+	<!-- login.html -->
+	<header>
+		<h1>Spring Security<small>JWT</small></h1>
+		<ul>
+			<li><a href="/">Home</a></li>
+			<li><a href="/login.html">Login</a></li>
+			<li><a href="/logout.html">Logout</a></li>
+			<li><a href="/join.html">Join</a></li>
+			<li><a href="/member.html">Member</a></li>
+			<li><a href="/admin.html">Admin</a></li>
+		</ul>
+	</header>
+	
+	<h2>Login</h2>
+	<form id="login-form">
+	<table class="vertical content">
+	    <tr>
+	        <th>아이디</th>
+	        <td><input type="text" id="username" name="username" class="short" required></td>
+	    </tr>
+	    <tr>
+	        <th>암호</th>
+	        <td><input type="password" id="password" name="password" class="short" required></td>
+	    </tr>
+	</table>
+	<div>
+		<button type="submit">로그인</button>
+	</div>
+	</form>
+	
+	<script src="js/auth.js"></script>	
+	<script>
+		document.getElementById('login-form')
+			.addEventListener('submit', async (e) => {
+		    
+			e.preventDefault();
+
+		    const form = e.target;
+		    const username = form.username.value;
+		    const password = form.password.value;
+
+		    const formData = new URLSearchParams();
+		    formData.append('username', username);
+		    formData.append('password', password);
+
+		    try {
+		        const response = await fetch('http://localhost:8080/login', {
+		            method: 'POST',
+		            headers: {
+		                'Content-Type': 'application/x-www-form-urlencoded'
+		            },
+		            body: formData,
+					credentials: 'include'
+		        });
+
+		        if (response.ok) {
+
+		            const accessToken = response.headers.get('Authorization');
+		            
+		            if (!accessToken) {
+		                alert('로그인은 성공했으나 Access Token을 받지 못했습니다.');
+		                return;
+		            }
+
+		          sessionStorage.setItem('accessToken', accessToken);
+					
+					sessionStorage.setItem('username', username); 
+					
+					try {
+			                        const payloadBase64 = accessToken.split('.')[1];
+                        
+                        			const payloadJson = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
+
+			                        const payload = JSON.parse(decodeURIComponent(payloadJson.split('').map(function(c) {
+                        				return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+			                        }).join('')));
+		                
+				        let roles = [];
+                		
+        				if (payload.roles && Array.isArray(payload.roles)) {
+	                            		roles = payload.roles; // 예: ["ROLE_MEMBER", "ROLE_ADMIN"]
+		                        } else if (payload.role && typeof payload.role === 'string') {
+                				roles = payload.role.split(',').map(r => r.trim()).filter(r => r.length > 0);
+		                        }
+                        
+                                        sessionStorage.setItem('roles', roles.join(',')); 
+
+                		        console.log('Roles saved:', roles.join(','));
+
+		                    } catch (error) {
+                		        console.error('JWT 디코딩 중 오류 발생:', error);
+		                        sessionStorage.removeItem('roles'); 
+                	    }
+
+		            window.location.href = 'index.html';
+
+		        } else {
+		            alert('아이디 또는 비밀번호가 틀렸습니다.');
+		        }
+
+		    } catch (error) {
+		        console.error('로그인 요청 중 오류 발생:', error);
+		        alert('로그인 중 문제가 발생했습니다.');
+		    }
+		});
+	</script>
+</body>
+</html>

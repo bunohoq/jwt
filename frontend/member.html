@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Spring Boot</title>
+    <link rel="stylesheet" href="http://bit.ly/3WJ5ilK">
+	<script>
+		// --- 1. 페이지 가드 스크립트 ---
+        // 이 스크립트는 페이지 본문이 로드되기 전에 실행되어야 합니다.
+        // 토큰이 없으면 즉시 리디렉션시킵니다.
+        const accessToken = sessionStorage.getItem('accessToken');
+        if (!accessToken) {
+            alert('로그인이 필요합니다.');
+            window.location.href = 'login.html';
+        }
+	</script>
+</head>
+<body>
+
+	<!-- member.html -->
+	<header>
+		<h1>Spring Security<small>JWT</small></h1>
+		<ul>
+			<li><a href="/">Home</a></li>
+			<li><a href="/login.html">Login</a></li>
+			<li><a href="/logout.html">Logout</a></li>
+			<li><a href="/join.html">Join</a></li>
+			<li><a href="/member.html">Member</a></li>
+			<li><a href="/admin.html">Admin</a></li>
+		</ul>
+	</header>
+	
+	<h2>Member</h2>
+	
+	<pre id="info">로딩 중...</pre>
+	
+	<script src="js/auth.js"></script>
+	<script>
+		
+        async function fetchMemberInfo() {
+            const accessToken = sessionStorage.getItem('accessToken');
+
+            if (!accessToken) {
+                console.error('No access token found');
+                redirectToLogin();
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:8080/member/info', {
+                    method: 'GET',
+                    headers: { 'Authorization': accessToken }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('info').textContent = JSON.stringify(data, null, 2);
+                } else if (response.status === 401) {
+
+                    console.log('Access token expired. Attempting to reissue...');
+                    
+
+                } else {
+                    throw new Error('Server error: ' + response.status);
+                }
+
+            } catch (error) {
+                console.error('데이터 요청 실패:', error.message);
+                if (error.message.includes('reissue')) {
+
+                } else {
+                    document.getElementById('info').textContent = '정보를 불러오는데 실패했습니다.';
+                }
+            }
+        }
+		
+
+		document.addEventListener('DOMContentLoaded', fetchMemberInfo);
+	</script>
+</body>
+</html>

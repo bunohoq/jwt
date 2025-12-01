@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Spring Boot</title>
+    <link rel="stylesheet" href="http://bit.ly/3WJ5ilK">
+</head>
+<body>
+	<!-- logout.html -->
+	<header>
+		<h1>Spring Security<small>JWT</small></h1>
+		<ul>
+			<li><a href="/">Home</a></li>
+			<li><a href="/login.html">Login</a></li>
+			<li><a href="/logout.html">Logout</a></li>
+			<li><a href="/join.html">Join</a></li>
+			<li><a href="/member.html">Member</a></li>
+			<li><a href="/admin.html">Admin</a></li>
+		</ul>
+	</header>
+	
+	<h2>Logout</h2>
+	<div>
+		<button type="button" id="logout-button">로그아웃</button>
+	</div>
+		
+	<script src="js/auth.js"></script>
+	<script>
+		
+		document.getElementById('logout-button').addEventListener('click', () => {
+
+			sessionStorage.removeItem('accessToken');
+			sessionStorage.removeItem('username');
+			window.location.href = 'index.html';
+		});
+		
+	</script>
+</body>
+</html>
